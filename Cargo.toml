@@ -1,7 +1,7 @@
 [package]
 name = "tgrep"
 description = "Grep but with time"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Bnz-0 <matteo.benzi97@gmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -9,3 +9,4 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.3", features = ["derive"] }
+colored = "2.1"

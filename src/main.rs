@@ -5,6 +5,8 @@ use std::str::FromStr;
 use std::sync::mpsc;
 use std::sync::mpsc::{Receiver, Sender};
 use std::time::{Duration, Instant};
+use colored::Colorize;
+use colored::ColoredString;
 
 #[derive(Clone, Copy)]
 enum TimeUnit {
@@ -49,7 +51,7 @@ impl clap::ValueEnum for TimeUnit {
     }
 }
 
-fn format_duration(d: Duration, unit: &Option<TimeUnit>) -> String {
+fn format_duration(d: Duration, unit: &Option<TimeUnit>) -> ColoredString {
     match unit {
         None => match d.as_nanos() {
             0..=1099 => format_duration(d, &Some(TimeUnit::Nano)),
@@ -57,10 +59,17 @@ fn format_duration(d: Duration, unit: &Option<TimeUnit>) -> String {
             1100000..=1099999999 => format_duration(d, &Some(TimeUnit::Milli)),
             _ => format_duration(d, &Some(TimeUnit::Seconds)),
         },
-        Some(TimeUnit::Nano) => format!("{}ns", d.as_nanos()),
-        Some(TimeUnit::Micro) => format!("{}us", d.as_micros()),
-        Some(TimeUnit::Milli) => format!("{}ms", d.as_millis()),
-        Some(TimeUnit::Seconds) => format!("{}s", d.as_secs()),
+        Some(TimeUnit::Nano) => format!("{}ns", d.as_nanos()).cyan(),
+        Some(TimeUnit::Micro) => format!("{:.3}us", d.as_nanos() as f64 / 1000.0).green(),
+        Some(TimeUnit::Milli) => format!("{:.3}ms", d.as_micros() as f64 / 1000.0).yellow(),
+        Some(TimeUnit::Seconds) => {
+        	let s = format!("{:.3}s", d.as_millis() as f64 / 1000.0);
+        	if d.as_secs() >= 10 {
+        		s.red().bold()
+        	} else {
+        		s.red()
+        	}
+        }
     }
 }
 
@@ -100,9 +109,10 @@ fn main() {
                 || line.content.contains(&pattern)
             {
                 println!(
-                    "{}\t| {}",
-                    format_duration(line.arrival_time - last_matched_time, &args.time_unit),
-                    line.content,
+                    "{duration:<0$}| {content}",
+                    10,
+                    duration=format_duration(line.arrival_time - last_matched_time, &args.time_unit),
+                    content=line.content,
                 );
                 last_matched_time = line.arrival_time;
             }
@@ -120,4 +130,3 @@ fn main() {
 
     handle.join().unwrap();
 }
-
