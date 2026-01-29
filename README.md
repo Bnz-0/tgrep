@@ -1,3 +1,8 @@
+### ⚠️ Repo moved to Codeberg: https://codeberg.org/bnz/tgrep ⚠️
+
+---
+---
+
 # tgrep — grep but with time
 
 `tgrep` is a much simpler version of `grep` but with a precise scope in mind:
